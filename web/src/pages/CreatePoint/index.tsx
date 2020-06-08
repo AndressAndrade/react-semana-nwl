@@ -9,6 +9,8 @@ import './styles.css';
 import api from '../../services/api';
 import ibge from '../../services/ibge';
 
+import Dropzone from '../../components/dropzone';
+
 interface Item {
     id: number;
     title: string;
@@ -48,6 +50,8 @@ const CreatePoint = () => {
         email: '',
         whatsapp: ''
     });
+
+    const [selectedFile, setSelectedFile] = useState<File>();
 
     const history = useHistory();
 
@@ -142,16 +146,23 @@ const CreatePoint = () => {
 
     function handleSubmit (event: FormEvent) {
         event.preventDefault();
-        api.post('points', {
-            name: formData.name,
-            email: formData.email,
-            whatsapp: formData.whatsapp,
-            latitude: selectedPosition[0],
-            longitude: selectedPosition[1],
-            city: selectedCity,
-            uf: selectedUf,
-            items: selectedItems
-        }).then(response => {
+
+        const data = new FormData();
+        data.append('name', formData.name);
+        data.append('email', formData.email);
+        data.append('whatsapp', formData.whatsapp);
+        data.append('latitude', String(selectedPosition[0]));
+        data.append('longitude', String(selectedPosition[1]));
+        data.append('city', selectedCity);
+        data.append('uf',selectedUf);
+        data.append('items', selectedItems.join(','));
+        
+        if (selectedFile) {
+            data.append('image', selectedFile);
+        }
+
+        api.post('points', data)
+        .then(response => {
             alert('Ponto de Coleta criado');
             history.push('/');
         }).catch(error => {
@@ -173,6 +184,9 @@ const CreatePoint = () => {
                 <h1>
                     Cadastro do <br/> ponto de coleta
                 </h1>
+
+                {/* Area de dropzone */}
+                <Dropzone onFileUploaded={setSelectedFile} />
 
                 {/* Nome/Email/Whatsapp */}
                 <fieldset>
