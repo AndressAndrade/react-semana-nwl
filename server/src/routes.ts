@@ -21,7 +21,7 @@ routes.get('/points/:id', pointsController.show);
 
 routes.post(
     '/points', 
-    upload.single('image'),
+    upload.single,
     celebrate(
         {
             body: Joi.object().keys({
